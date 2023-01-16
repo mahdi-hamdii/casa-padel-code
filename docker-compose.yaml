@@ -1,0 +1,143 @@
+version: "3.3"
+services:
+  # casapadelsfax-auth:
+  #   container_name: casapadelsfax-auth
+  #   build:
+  #     # context: ./
+  #     context: ./microservice-auth
+  #   command: "npm run start:dev"
+  #   ports:
+  #     - 3000:3000
+  #   networks:
+  #     - casapadel
+  #   environment:
+  #     - DATABASE_USER=admin
+  #     - DATABASE_PASSWORD=admin
+  #     - DATABASE_LINK=casapadelsfax_mongodb:27017
+  #     - JAGGER_HOST=http://localhost:14268/api/traces
+  #     - JAGGER_SERVICE_NAME=casa-padel-sfax
+  #     - ENV=dev  
+
+
+
+  # casapadelsfax-microservice-tournaments:
+  #   container_name: casapadelsfax-microservice-tournaments
+  #   build:
+  #     # context: ./
+  #     context: ./microservice-tournaments
+  #   command: "npm run start:dev"
+  #   ports:
+  #     - 3030:3000
+  #   networks:
+  #     - casapadel
+  #   environment:
+  #     - DATABASE_USER=admin
+  #     - DATABASE_PASSWORD=admin
+  #     - DATABASE_LINK=casapadelsfax_mongodb:27017
+  #     - JAGGER_HOST=http://localhost:14268/api/traces
+  #     - JAGGER_SERVICE_NAME=casa-padel-sfax
+  #     - ENV=dev
+
+
+  # casapadelsfax-microservice-reservations:
+  #   container_name: casapadelsfax-microservice-reservations
+  #   build:
+  #     # context: ./
+  #     context: ./microservice-reservations
+  #   command: "npm run start:dev"
+  #   ports:
+  #     - 3000:3000
+  #   networks:
+  #     - casapadel
+  #   environment:
+  #     - DATABASE_USER=admin
+  #     - DATABASE_PASSWORD=admin
+  #     - DATABASE_LINK=casapadelsfax_mongodb:27017
+  #     - JAGGER_HOST=http://localhost:14268/api/traces
+  #     - JAGGER_SERVICE_NAME=casa-padel-sfax
+  #     - ENV=dev
+
+
+  casapadelsfax-microservice-sponsors:
+    container_name: casapadelsfax-microservice-sponsors-2
+    build:
+      # context: ./
+      context: ./microservice-sponsors/
+    command: npm run start:dev
+    # ports:
+      # - 3001:3000
+    networks:
+      - casapadel
+    environment:
+      - DATABASE_USER=admin
+      - DATABASE_PASSWORD=admin
+      - DATABASE_LINK=casapadelsfax_mongodb:27017
+      - JAGGER_HOST=http://localhost:14268/api/traces
+      - JAGGER_SERVICE_NAME=casa-padel-sfax
+      - ENV=dev
+
+      # - REDIS_QUEUE_HOST=redis-server
+      - REDIS_QUEUE_HOST=localhost
+      - REDIS_QUEUE_PORT=6379
+    depends_on:
+      - redis
+
+  redis:
+    container_name: redis
+    image: 'redis:alpine'
+    command:
+      - redis-server
+    ports:
+      - 6379:6379
+    volumes:
+      - ./redis-service/config/redis.conf:/redis.conf
+        # - ./redis-data:/redis.conf
+      # - $PWD/redis-data:/var/lib/redis
+      # - $PWD/redis.conf:/usr/local/etc/redis/redis.conf
+
+
+  api-gateway-4:
+    container_name: api-gateway-4
+    build:
+      context: ./api-gateway/
+    # volumes:
+    #   - ./api-gateway-2:/usr/src/app
+    ports:
+      - 3000:3000
+    command: npm run start:dev
+    environment:
+      - REDIS_QUEUE_HOST=redis
+      - REDIS_QUEUE_PORT=6379
+      - DATABASE_USER=admin
+      - DATABASE_PASSWORD=admin
+      - DATABASE_LINK=casapadelsfax_mongodb:27017
+      - JAGGER_HOST=http://localhost:14268/api/traces
+      - JAGGER_SERVICE_NAME=casa-padel-sfax
+      - ENV=dev
+    depends_on:
+      - redis
+
+  mongo:
+    container_name: casapadelsfax_mongodb
+    image: mongo
+    ports:
+      - 27017:27017
+    volumes:
+      - mongodbData:/data/db
+    networks:
+      - casapadel
+    environment:
+    - MONGO_INITDB_DATABASE=casapadelsfax
+    - MONGO_INITDB_ROOT_USERNAME=admin
+    - MONGO_INITDB_ROOT_PASSWORD=admin
+volumes:
+  mongodbData: {}
+networks:
+  casapadel: {}
+
+
+
+
+
+
+
